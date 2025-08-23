@@ -1,6 +1,20 @@
 import express from "express";
 import path from "path";
-import products from "./data/products.json" assert { type: "json" };
+// removed `import products from "./data/products.json" assert { type: "json" }` and replaced with the following 11 lines of code to make product stable across different Node versions
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const products = JSON.parse(
+  readFileSync(join(__dirname, "data", "products.json"), "utf-8")
+);
+
+console.log(products); // test output
+
+// removed `import products from "./data/products.json" assert { type: "json" }` to 
 
 const app = express();
 

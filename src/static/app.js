@@ -1,16 +1,70 @@
 window.addEventListener("DOMContentLoaded", setup);
 
+const API = {
+  PRODUCTS: "/products", // same-origin; no CORS headaches
+};
+
 async function setup() {
 	// START HERE
 	// API Endpoint: GET /products
 	// Returns: Array of product objects with id, title, price (in cents), and array of images
-	// TODO: Fetch products from the API
-	// TODO: Render the products to the page in a responsive grid
 	// TODO: Sort the products by price (low to high by default)
 	// TODO: Implement search functionality
 	// BONUS: Use the refactored sorting function for dynamic sort order
 	// BONUS: Add error handling for the fetch request
+	 
+	setStatus("Loading products…");
+	// TODO: Fetch products from the API
+	try {
+    const raw = await fetchJSON(API.PRODUCTS, { timeout: 8000 });
+    const products = normalizeProducts(raw);
+
+    console.log("[products]", products);
+
+    setStatus(`Loaded ${products.length} product${products.length === 1 ? "" : "s"}.`);
+
+  // TODO: Render the products to the page in a responsive grid
+
+  } catch (err) {
+    console.error("Failed to load products:", err);
+    setStatus("We couldn’t load products right now. Please try again.");
+  }
 }
+
+async function fetchJSON(url, options = {}) {
+  const { timeout = 8000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+function normalizeProducts(data) {
+  if (!Array.isArray(data)) return [];
+  return data.map(p => ({
+    id: p?.id ?? "",
+    title: String(p?.title ?? ""),
+    price: Number(p?.price ?? 0),         // still in cents per the README
+    images: Array.isArray(p?.images) ? p.images : [],
+  }));
+}
+
+function setStatus(text) {
+  const el = document.getElementById("status");
+  if (el) el.textContent = text;
+}
+
+
 /**
  * Sorts an array of products by price in ascending or descending order.
  *
@@ -31,6 +85,7 @@ async function setup() {
  * @param {string} sortOrder - Either "asc" for ascending or "desc" for descending sort order.
  * @returns {Array} - A new array of products sorted by price in the specified order.
  */
+
 function messyFunction(data1, data2) {
 	let t = [];
 	for (let i = 0; i < data1.length; i++) {

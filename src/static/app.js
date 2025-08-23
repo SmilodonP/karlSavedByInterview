@@ -86,19 +86,75 @@ function setStatus(text) {
  * @returns {Array} - A new array of products sorted by price in the specified order.
  */
 
-function messyFunction(data1, data2) {
-	let t = [];
-	for (let i = 0; i < data1.length; i++) {
-		t.push(data1[i]);
-	}
-	for (let i = 0; i < t.length; i++) {
-		for (let j = i + 1; j < t.length; j++) {
-			if ((data2 === "asc" && t[i].price > t[j].price) || (data2 === "desc" && t[i].price < t[j].price)) {
-				let tmp = t[i];
-				t[i] = t[j];
-				t[j] = tmp;
-			}
-		}
-	}
-	return t;
+function renderProducts(products, container) {
+  container.setAttribute("aria-busy", "true");
+  container.innerHTML = "";
+
+  if (!products.length) {
+    container.innerHTML = `<div class="empty-state">No products found.</div>`;
+    container.setAttribute("aria-busy", "false");
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  for (const p of products) {
+    const imgUrl = (Array.isArray(p.images) && p.images[0]) || "https://via.placeholder.com/600x600?text=No+Image";
+    const price = formatPrice(p.price);
+
+    const card = document.createElement("article");
+    card.className = "product-card";
+    card.innerHTML = `
+      <div class="product-media">
+        <img src="${imgUrl}" alt="${escapeHtml(p.title)}" loading="lazy" />
+      </div>
+      <div class="product-info">
+        <h2 class="product-title">${escapeHtml(p.title)}</h2>
+        <div class="product-meta">
+          <span class="product-price">${price}</span>
+        </div>
+      </div>
+    `;
+    frag.appendChild(card);
+  }
+
+  container.appendChild(frag);
+  container.setAttribute("aria-busy", "false");
 }
+
+/** Helpers */
+function formatPrice(cents) {
+  const dollars = (Number(cents) || 0) / 100;
+  return dollars.toLocaleString(undefined, { style: "currency", currency: "USD" });
+}
+
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function setStatus(text) {
+  const el = document.getElementById("status");
+  if (el) el.textContent = text;
+}
+
+// function messyFunction(data1, data2) {
+// 	let t = [];
+// 	for (let i = 0; i < data1.length; i++) {
+// 		t.push(data1[i]);
+// 	}
+// 	for (let i = 0; i < t.length; i++) {
+// 		for (let j = i + 1; j < t.length; j++) {
+// 			if ((data2 === "asc" && t[i].price > t[j].price) || (data2 === "desc" && t[i].price < t[j].price)) {
+// 				let tmp = t[i];
+// 				t[i] = t[j];
+// 				t[j] = tmp;
+// 			}
+// 		}
+// 	}
+// 	return t;
+// }

@@ -127,7 +127,7 @@ main {
    Product Card
    ========================= */
 .product-card {
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--radius);
   background: #fff;
   overflow: hidden;

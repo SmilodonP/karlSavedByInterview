@@ -12,8 +12,6 @@ const products = JSON.parse(
   readFileSync(join(__dirname, "data", "products.json"), "utf-8")
 );
 
-console.log(products); 
-
 const app = express();
 
 // SERVE STATIC PAGES
@@ -21,7 +19,15 @@ app.use(express.static(path.join(process.cwd(), "/src/static")));
 
 // ~~~~~ API ~~~~~ //
 app.get("/products", (req, res) => {
-	res.send(products);
+	const normalized = products.map(p => ({
+    ...p,
+    images: Array.isArray(p.images)
+      ? p.images
+          .map(img => (typeof img === "string" ? img : img?.src))
+          .filter(Boolean)
+      : [],
+  }));
+  res.json(normalized);
 });
 
 app.listen(3000, (...e) => console.log("Server Started", e));

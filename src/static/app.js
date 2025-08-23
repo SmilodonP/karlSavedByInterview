@@ -5,87 +5,62 @@ const API = {
 };
 
 async function setup() {
-	// START HERE
-	// API Endpoint: GET /products
-	// Returns: Array of product objects with id, title, price (in cents), and array of images
-	// TODO: Sort the products by price (low to high by default)
-	// TODO: Implement search functionality
-	// BONUS: Use the refactored sorting function for dynamic sort order
-	// BONUS: Add error handling for the fetch request
-	 
-	setStatus("Loading products…");
-	// TODO: Fetch products from the API
-	try {
-    const raw = await fetchJSON(API.PRODUCTS, { timeout: 8000 });
-    const products = normalizeProducts(raw);
+  const grid = document.getElementById("productGrid");
+  setStatus("Loading products…");
 
-    console.log("[products]", products);
+  // 1) fetch
+  const products = await fetchProducts();
 
-    setStatus(`Loaded ${products.length} product${products.length === 1 ? "" : "s"}.`);
+  // 2) default sort: low → high
+  const view = sortProducts(products, "asc");
 
-  // TODO: Render the products to the page in a responsive grid
-
-  } catch (err) {
-    console.error("Failed to load products:", err);
-    setStatus("We couldn’t load products right now. Please try again.");
-  }
+  // 3) render
+  renderProducts(view, grid);
+  setStatus(`Loaded ${view.length} product${view.length === 1 ? "" : "s"}.`);
 }
-
-async function fetchJSON(url, options = {}) {
-  const { timeout = 8000 } = options;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } finally {
-    clearTimeout(id);
-  }
-}
-
-function normalizeProducts(data) {
-  if (!Array.isArray(data)) return [];
-  return data.map(p => ({
-    id: p?.id ?? "",
-    title: String(p?.title ?? ""),
-    price: Number(p?.price ?? 0),         // still in cents per the README
-    images: Array.isArray(p?.images) ? p.images : [],
-  }));
-}
-
-function setStatus(text) {
-  const el = document.getElementById("status");
-  if (el) el.textContent = text;
-}
-
 
 /**
- * Sorts an array of products by price in ascending or descending order.
- *
- * Your task is to refactor and improve this function:
- * - Make it clean, modern, and readable.
- * - Allow sorting in either "asc" or "desc" order using the `sortOrder` parameter.
- * - Ensure the output remains the same.
- * - A plus, but you do not need to use the messyFunction() function.
- *
- * Requirements:
- * - Refactor the code to use modern JavaScript syntax and best practices.
- * - Rename variables and functions to be more descriptive.
- * - Fill in the missing parts of the JSDoc comments.
- *
- * Feel free to leave comments explaining your thought process.
- *
- * @param {Array} products - Array of product objects, each with a `price` property.
- * @param {string} sortOrder - Either "asc" for ascending or "desc" for descending sort order.
- * @returns {Array} - A new array of products sorted by price in the specified order.
+ * Fetch products from the API with basic error handling.
+ * Endpoint: GET /products
+ * Expected: [{ id, title, price (cents), images: [url,...] }, ...]
  */
+async function fetchProducts() {
+  try {
+    const result = await fetch(API.PRODUCTS, { headers: { Accept: "application/json" } });
+    if (!result.ok) throw new Error(`HTTP ${result.status}`);
+    const data = await result.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    const grid = document.getElementById("productGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <p>We couldn't load products right now. Please try again.</p>
+        </div>
+      `;
+    }
+    setStatus("Failed to load products.");
+    return [];
+  }
+}
 
+/**
+ * Sort products by price (cents).
+ * @param {Array<{price:number}>} products
+ * @param {"asc"|"desc"} sortOrder
+ * @returns {Array}
+ */
+function sortProducts(products, sortOrder = "asc") {
+  const dir = sortOrder === "desc" ? -1 : 1;
+  return products.slice().sort((a, b) => (a.price - b.price) * dir);
+}
+
+/**
+ * Render a simple product grid.
+ * @param {Array<{id:string|number,title:string,price:number,images:string[]}>} products
+ * @param {HTMLElement} container
+ */
 function renderProducts(products, container) {
   container.setAttribute("aria-busy", "true");
   container.innerHTML = "";
@@ -141,20 +116,3 @@ function setStatus(text) {
   const el = document.getElementById("status");
   if (el) el.textContent = text;
 }
-
-// function messyFunction(data1, data2) {
-// 	let t = [];
-// 	for (let i = 0; i < data1.length; i++) {
-// 		t.push(data1[i]);
-// 	}
-// 	for (let i = 0; i < t.length; i++) {
-// 		for (let j = i + 1; j < t.length; j++) {
-// 			if ((data2 === "asc" && t[i].price > t[j].price) || (data2 === "desc" && t[i].price < t[j].price)) {
-// 				let tmp = t[i];
-// 				t[i] = t[j];
-// 				t[j] = tmp;
-// 			}
-// 		}
-// 	}
-// 	return t;
-// }

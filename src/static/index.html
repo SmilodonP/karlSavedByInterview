@@ -1,19 +1,44 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <link rel="stylesheet" href="/index.css">
-  <script src="/app.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SavedBy Mock Store</title>
-</head>
 
+  <!-- Google font from README -->
+  <link href="https://fonts.googleapis.com/css?family=Mina&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/index.css">
+
+  <!-- App logic -->
+  <script defer src="/app.js"></script>
+</head>
 <body>
+  <!-- Header -->
   <header>
+    <h1>SavedBy Store</h1>
+    <button class="cart-button" aria-label="View cart">
+      <img src="/cart.svg" alt="" />
+    </button>
   </header>
 
+  <!-- Controls -->
+  <div class="controls">
+    <label class="visually-hidden" for="search">Search products</label>
+    <input id="search" type="search" placeholder="Search products…" class="search-input" />
+
+    <label class="visually-hidden" for="sort">Sort by</label>
+    <select id="sort" class="sort-select">
+      <option value="asc">Price: Low → High</option>
+      <option value="desc">Price: High → Low</option>
+    </select>
+  </div>
+
+  <h2>Products</h2>
+
   <main>
+    <div id="productGrid"></div>
   </main>
 </body>
-
 </html>

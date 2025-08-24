@@ -1,11 +1,11 @@
+/* ======================================================================
+   Base / Reset
+   ====================================================================== */
 *,
 *::before,
 *::after { box-sizing: border-box; }
 
-html, body {
-  margin: 0;
-  padding: 0;
-}
+html, body { margin: 0; padding: 0; }
 
 :root {
   --bg: #ffffff;
@@ -13,9 +13,10 @@ html, body {
   --muted: #6b7280;
   --border: #e5e7eb;
   --panel: #f8fafc;
-  --accent: #0ea5e9; /* light blue accent */
+  --accent: #0ea5e9;            /* light blue accent */
   --radius: 12px;
   --gap: 14px;
+  --shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 body {
@@ -25,14 +26,11 @@ body {
   line-height: 1.4;
 }
 
-/* =========================
-   Layout
-   ========================= */
+/* ======================================================================
+   Header
+   ====================================================================== */
 header {
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding: 5px 10px;             
   border-bottom: 1px solid var(--border);
   background: var(--accent);
   display: flex;
@@ -43,6 +41,7 @@ header {
 header h1 {
   margin: 0;
   font-weight: 700;
+  color: #000000;    
 }
 
 .cart-button {
@@ -55,14 +54,21 @@ header h1 {
 }
 
 .cart-button:hover,
-.cart-button:focus {
-  background-color: rgba(0,0,0,0.05);
-}
+.cart-button:focus { background-color: rgba(0,0,0,0.08); }
 
 .cart-button img {
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   display: block;
+}
+
+/* ======================================================================
+   Layout
+   ====================================================================== */
+h2 {
+  padding: 5px 10px;
+  font-size:xx-large;
+  font-weight: bolder;
 }
 
 main {
@@ -71,21 +77,16 @@ main {
   padding: 16px;
 }
 
-/* Status text above grid */
-#status {
-  margin: 4px 0 12px;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
 
-/* =========================
-   Controls (optional)
-   ========================= */
+/* ======================================================================
+   Controls (Search + Sort)
+   - Mobile: single column → search spans nearly full width
+   - ≥430px: two columns → search grows (1fr), sort auto width
+   ====================================================================== */
 .controls {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: grid; 
   gap: 10px;
-  margin-bottom: 12px;
+  margin: 12px 10px;
 }
 
 .search-input,
@@ -106,66 +107,105 @@ main {
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
-/* =========================
-   Product Grid
-   ========================= */
-/* Mobile-first: 2 columns */
-#productGrid {
-  display: grid;
-  gap: var(--gap);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Make search nearly full-viewport width on small screens */
+.search-input {
+  /* width: 95vw;                */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-/* README breakpoint: at 430px switch to 3 columns */
+/* ≥430px: inline layout; let search fill its track instead of fixed vw */
 @media (min-width: 430px) {
-  #productGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .controls {
+    grid-template-columns: 2fr auto;
+    align-items: center;
+  }
+  .search-input {
+    width: auto;                    
+    max-width: none;
   }
 }
 
-/* =========================
+/* ======================================================================
+   Product Grid
+   - Mobile-first: 2 columns
+   - ≥430px: 3 columns
+   ====================================================================== */
+#productGrid {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 cols mobile */
+}
+
+/* allow grid children to shrink within tracks (prevents overflow issues) */
+#productGrid > * { min-width: 0; }
+
+@media (min-width: 430px) {
+  #productGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 cols desktop */
+  }
+}
+
+/* ======================================================================
    Product Card
-   ========================= */
+   ====================================================================== */
 .product-card {
+  display: grid;
+  grid-template-rows: auto 1fr;    /* media on top, info beneath */
   border: none;
   border-radius: var(--radius);
   background: #fff;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  overflow: hidden;                /* keeps rounded corners clean */
   transition: box-shadow 0.15s ease, transform 0.1s ease;
 }
 
 .product-card:hover,
 .product-card:focus-within {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow);
   transform: translateY(-1px);
 }
 
-/* Square media area to keep a tidy grid */
+/* Stable square media area with reserved space (prevents CLS) */
 .product-media {
-  aspect-ratio: 1 / 1;
-  background: #f3f4f6;
+  position: relative;
+  width: 100%;
+  background: #ffffff;
   overflow: hidden;
 }
 
+/* Reserve 1:1 space immediately; works even if aspect-ratio unsupported */
+.product-media::before {
+  content: "";
+  display: block;
+  padding-top: 100%;              
+}
+
+/* Product image */
 .product-media img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;          
+  object-position: center;
   display: block;
 }
 
+/* Product info */
 .product-info {
   padding: 10px 12px 12px;
   display: grid;
   gap: 8px;
 }
 
+/* Responsive typography for titles & price */
 .product-title {
   margin: 0;
-  font-size: 0.98rem;
+  font-weight: 800;
   line-height: 1.25;
+  font-size: clamp(0.95rem, 2.6vw, 1.25rem);
+  overflow-wrap: anywhere;         /* prevents long words from breaking grid */
+  word-break: break-word;          /* legacy fallback */
 }
 
 .product-meta {
@@ -176,11 +216,12 @@ main {
 
 .product-price {
   font-weight: 700;
+  font-size: clamp(0.95rem, 2.1vw, 1.1rem);
 }
 
-/* =========================
+/* ======================================================================
    Empty State
-   ========================= */
+   ====================================================================== */
 .empty-state {
   border: 1px dashed var(--border);
   color: var(--muted);
@@ -190,9 +231,9 @@ main {
   background: #fafafa;
 }
 
-/* =========================
-   Accessibility helpers
-   ========================= */
+/* ======================================================================
+   A11y helpers
+   ====================================================================== */
 .visually-hidden {
   position: absolute !important;
   height: 1px; width: 1px;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SavedBy Mock Store</title>
 
   <!-- Google font from README -->
@@ -23,17 +23,22 @@
     </button>
   </header>
 
-  <main>
-    <!-- Controls: search + sort -->
-    <div class="controls">
-      <label class="visually-hidden" for="search">Search products</label>
-      <input id="search" type="search" placeholder="Search products…" class="search-input" />
-    </div>
-    <h1>Products</h1>
+  <!-- Controls -->
+  <div class="controls">
+    <label class="visually-hidden" for="search">Search products</label>
+    <input id="search" type="search" placeholder="Search products…" class="search-input" />
 
-    <!-- Product grid -->
+    <label class="visually-hidden" for="sort">Sort by</label>
+    <select id="sort" class="sort-select">
+      <option value="asc">Price: Low → High</option>
+      <option value="desc">Price: High → Low</option>
+    </select>
+  </div>
+
+  <h2>Products</h2>
+
+  <main>
     <div id="productGrid"></div>
-    <script defer src="/app.js"></script>
   </main>
 </body>
 </html>
